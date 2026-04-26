@@ -1,0 +1,7 @@
+//Register a new user
+POST https://localhost:8080/register
+Content-Type: application/json
+
+{
+    "userName": "fassdfaf", "password": "fdasnhfusdf", "mail":"giorgibezhisah@gmail.com"
+}

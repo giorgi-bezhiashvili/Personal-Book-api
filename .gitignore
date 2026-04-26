@@ -1,0 +1,9 @@
+# Security
+localhost.key
+localhost.crt
+
+# Dependencies
+node_modules/
+
+# Environment variables
+.env
