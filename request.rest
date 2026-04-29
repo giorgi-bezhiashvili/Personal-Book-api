@@ -21,6 +21,6 @@ POST {{baseUrl}}/login
 Content-Type: application/json
 
 {
-    "userName": "{{username}}",
-    "password": "{{password}}"
+    "password": "{{password}}",
+    "email": "{{email}}"
 }
