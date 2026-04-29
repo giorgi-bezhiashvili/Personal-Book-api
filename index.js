@@ -14,6 +14,8 @@ const Joi = require(`joi`);
 const helmet = require(`helmet`);
 dotenv.config();
 app.disable("x-powered-by");
+const dummyHash = `$2b$10$eFN4uM/jBviTKQFDeAxTc.XtwRl3ujt4yKYRi0oDpd5nlDxmEcgZS`
+
 
 app.use(
   helmet({
@@ -21,11 +23,24 @@ app.use(
   }),
 );
 
+function authenticationToken(req, res, next) {
+  const authHeader = req.headers[`authorization`];
+  const token = authHeader && authHeader.split(" ")[1];
+  if (token == null) {
+    return res.status(401);
+  }
+  jwt.verify(token, process.env.ACCES_TOKEN_SECRET, (err, user) => {
+    if (err) return res.sendStatus(403);
+    req.user = user;
+    next();
+  });
+}
+
 const loginSceme = Joi.object({
   email: Joi.string().email().required(),
   password: Joi.string().min(8).max(20).required(),
-  userN: Joi.string().alphanum(),
-}).xor(`userN`, "email");
+  userName: Joi.string().alphanum(),
+}).xor(`userName`, "email");
 
 app.use(express.json());
 const getFileData = () => {
@@ -81,34 +96,47 @@ app.post(
     }
   },
 );
+const FAKE_HASH = "$2b$10$C6Q8XjO4vXzG9.Y7.Q1eOu.uK9O3e4R5t6y7u8i9o0p1a2s3d4f5g";
+
 app.post(`/login`, async (req, res) => {
-  const { error, value } = loginSceme.validate(req.body);
-  if (error) {
-    console.log(error);
-    return res.send(`Invalid request`);
-  }
+  const { error } = loginSceme.validate(req.body);
+  if (error) return res.status(400).send("Invalid request");
+
   try {
     const { userName, email, password } = req.body;
     const users = getFileData();
+
+    // 1. Look for the user
     const user = users.find((u) =>
-      userName ? u.userName === userName : u.email === email,
+      userName ? u.userName === userName : u.email === email
     );
-    if (user === undefined) {
-      return res.send(`Username or password isnt correct`);
+
+    // 2. THE SHIELD: Always select a valid-looking hash.
+    // If the user isn't found, we use the FAKE_HASH so bcrypt still runs slowly.
+    const hashToVerify = user ? user.password : FAKE_HASH;
+
+    // 3. THE HEAVY LIFT: This takes ~100ms for EVERY request.
+    const isMatch = await bcrypt.compare(password, hashToVerify);
+
+    // 4. THE GATEKEEPER: Check both conditions only AFTER the math is done.
+    if (!user || !isMatch) {
+      return res.status(401).send("Username or password isn't correct");
     }
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.send(`Invalid username or password`);
-    }
-    const accesToken = await jwt.sign(user, process.env.ACCES_TOKEN_SECRET);
-    res.json({ isMatch, accesToken });
+
+    const accessToken = jwt.sign(
+      { id: user.id, userN: user.userName }, 
+      process.env.ACCES_TOKEN_SECRET,
+      { expiresIn: '1h' }
+    );
+
+    res.json({ message: "Login successful", accessToken });
   } catch (err) {
-    console.log(err);
-    res.status(404).send(`server error`);
+    console.error(err);
+    res.status(500).send("Server error");
   }
 });
 
 const server = https.createServer(httpsNeccecities, app);
 server.listen(8080, (req, res) => {
-  console.log(`Server is spinning on port 3000`);
+  console.log(`Server is spinning on port 8080`);
 });
