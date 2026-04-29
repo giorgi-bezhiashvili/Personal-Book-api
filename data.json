@@ -1,12 +1,7 @@
 [
   {
-    "userName": "fassdfaf",
-    "password": "$2b$10$jwG/iLrJ7kHRAt618Jsvcu.M0ViurZysqm7c2vCvAg.MY1q8LkvXG",
-    "email": "giorgibezhisah@gmail.com"
-  },
-  {
-    "userName": "fassdsfaf",
-    "password": "$2b$10$1UUekkwT.i4UmDs8Fw.r4eUY1Qo2Ou7keur7YfayXhv3pMiDYtjNy",
-    "email": "giorgibezhisah@gmail.com"
+    "userName": "johndoe",
+    "password": "$2b$10$8G0mdvcqCwS1eNibWcY0bOb1pTlZEt.J./1ZMvpzMfoeMC1UEOjSG",
+    "email": "johndoe@gmail.com"
   }
 ]

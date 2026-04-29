@@ -8,6 +8,9 @@ const cert = fs.readFileSync(path.join(__dirname , `localhost.crt`))
 const https = require(`https`)
 const httpsNeccecities = {key:key , cert:cert}
 const { query, validationResult, body } = require('express-validator');
+const jwt = require('jsonwebtoken');
+const dotenv = require('dotenv');
+dotenv.config();
 
 app.use(express.json());
 const getFileData = () => {
@@ -68,12 +71,14 @@ app.post(`/login` , async (req,res)=>{
     if(!isMatch){
       return res.send(`Invalid username or password`)
     }
-    res.send(`Is match`)
+    const accesToken = await jwt.sign(user,process.env.ACCES_TOKEN_SECRET)
+    res.json({isMatch , accesToken})
   }catch(err){
     console.log(err);
     res.status(404).send(`server error`)
   }
 })
+
 const server = https.createServer((httpsNeccecities), app)
 server.listen(8080, (req,res)=>{
     console.log(`Server is spinning on port 3000`)
