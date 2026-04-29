@@ -1,7 +1,26 @@
-//Register a new user
-POST https://localhost:8080/register
+### Global Variables
+@baseUrl = https://localhost:8080
+@username = johndoe
+@password = johndoe208
+@email = johndoe@gmail.com
+
+### Register a new user
+# @name register
+POST {{baseUrl}}/register
 Content-Type: application/json
 
 {
-    "userName": "fassdfaf", "password": "fdasnhfusdf", "mail":"giorgibezhisah@gmail.com"
+    "userName": "{{username}}",
+    "password": "{{password}}",
+    "mail": "{{email}}"
+}
+
+### Login
+# @name login
+POST {{baseUrl}}/login
+Content-Type: application/json
+
+{
+    "userName": "{{username}}",
+    "password": "{{password}}"
 }
