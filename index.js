@@ -9,9 +9,18 @@ const Joi = require("joi");
 const helmet = require("helmet");
 const { v4: uuidv4 } = require("uuid");
 const { body, validationResult } = require("express-validator");
-
+const ratelimit = require('express-rate-limit')
 dotenv.config();
 const app = express();
+
+const rateLimiter = ratelimit({
+  windowMs: 1 * 60 * 1000,
+  limit: 20,
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+  message: "Too many requests, please try again later."
+});
+
 app.use(express.json());
 app.use(helmet({ xPoweredBy: false }));
 
@@ -74,7 +83,7 @@ app.post("/register", [
   body("userName").notEmpty(),
   body("password").isLength({ min: 8 }),
   validate 
-], async (req, res) => {
+],rateLimiter, async (req, res) => {
   try {
     const { userName, mail, password } = req.body;
     const users = getFileData();
@@ -99,7 +108,7 @@ app.post("/register", [
   }
 });
 
-app.post("/login", async (req, res) => {
+app.post("/login",rateLimiter, async (req, res) => {
   const { error } = loginSchema.validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 

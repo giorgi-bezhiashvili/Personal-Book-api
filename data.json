@@ -1,16 +1,9 @@
 [
   {
+    "id": "ec80b756-7abf-4649-a8ce-c0d3ed9881df",
     "userName": "johndoe",
-    "password": "$2b$10$YJKx8R5oMKQFbPI1N9a0XOZxqfkzAMHQaMgf/aclsZf/h8E0sKv4y",
     "email": "john@example.com",
-    "id": "4ae5c259-bf29-4e8a-b1bd-d77ac7b4900d",
-    "books": [
-      {
-        "title": "The Great Gatsby",
-        "author": "F. Scott Fitzgerald",
-        "bookId": "a63efafa-c83e-4b91-9511-b1654baf38d4",
-        "state": "read"
-      }
-    ]
+    "password": "$2b$10$vHeiGyw2FDYDGlRReoxc5.BC9OL/y7xUp.hFV6Kgjk7yAYAsmv9Om",
+    "books": []
   }
 ]

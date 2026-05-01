@@ -27,8 +27,8 @@ Content-Type: application/json
 ### ---------------------------------------------------------
 ### SETUP FOR AUTHENTICATED REQUESTS
 ### Paste the accessToken and the id from the login/register steps here:
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjRhZTVjMjU5LWJmMjktNGU4YS1iMWJkLWQ3N2FjN2I0OTAwZCIsInVzZXJOIjoiam9obmRvZSIsImlhdCI6MTc3NzY0ODE3OCwiZXhwIjoxNzc3NjUxNzc4fQ.UbikDP-UUTw9IeA7x0orRvjjxZdjrJ3rfZ4qiExIju4
-@userId = 4ae5c259-bf29-4e8a-b1bd-d77ac7b4900d
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImVjODBiNzU2LTdhYmYtNDY0OS1hOGNlLWMwZDNlZDk4ODFkZiIsInVzZXJOIjoiam9obmRvZSIsImlhdCI6MTc3NzY1MTA0OSwiZXhwIjoxNzc3NjU0NjQ5fQ.gQF-y7iOfILsMtTT-pgqjMoz_TKxo4sssas3p4w2Tpo
+@userId = ec80b756-7abf-4649-a8ce-c0d3ed9881df
 ### ---------------------------------------------------------
 
 ### 3. Add a book to user's collection
@@ -48,7 +48,7 @@ Authorization: Bearer {{token}}
 
 ### 5. Update a specific book (Test the line)
 # This will return the bookId if successful, or 403 if IDs don't match
-@bookIdToUpdate = 6cd6ca5d-adc8-4810-9dfe-787544e33373
+@bookIdToUpdate = f737c9cd-1434-4a64-9173-1cf14d35dc77
 PUT {{baseUrl}}/{{userId}}/book/{{bookIdToUpdate}}
 Authorization: Bearer {{token}}
 Content-Type: application/json
@@ -59,7 +59,7 @@ Content-Type: application/json
 }
 ### 7. Delete a specific book
 # This will remove the book if IDs match and return the updated book list
-@bookIdToDelete = 4ae5c259-bf29-4e8a-b1bd-d77ac7b4900d
+@bookIdToDelete = f737c9cd-1434-4a64-9173-1cf14d35dc77
 DELETE {{baseUrl}}/{{userId}}/book/{{bookIdToDelete}}
 Authorization: Bearer {{token}}
 
