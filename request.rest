@@ -57,7 +57,16 @@ Content-Type: application/json
   "title": "Updated Book Title",
   "state": "reading"
 }
+### 7. Delete a specific book
+# This will remove the book if IDs match and return the updated book list
+@bookIdToDelete = 4ae5c259-bf29-4e8a-b1bd-d77ac7b4900d
+DELETE {{baseUrl}}/{{userId}}/book/{{bookIdToDelete}}
+Authorization: Bearer {{token}}
 
+### 8. Test Delete "Access Denied" (Unauthorized ID)
+# Trying to delete a book from a different user's account
+DELETE {{baseUrl}}/SOME_OTHER_USER_ID/book/{{bookIdToDelete}}
+Authorization: Bearer {{token}}
 ### 6. Test "Access Denied" (Simulate hacking/error)
 # Using a fake userId in the URL while keeping your real token
 PUT {{baseUrl}}/WRONG_USER_ID/book/{{bookIdToUpdate}}

@@ -176,6 +176,7 @@ app.put("/:id/book/:bookId",authenticationToken,(req,res)=>{
     const bookId = req.params.bookId
     const users = getFileData()
     const userIndex = users.findIndex((u) => u.id === req.params.id);
+    if (userIndex === -1) return res.status(403).send(`User not found`);
 
     const updatedBook={
       title:title,
@@ -189,6 +190,24 @@ app.put("/:id/book/:bookId",authenticationToken,(req,res)=>{
     } catch (err) {
       console.log(err);
       res.send(`server error`)
+  }
+})
+app.delete("/:id/book/:bookId", authenticationToken,(req,res)=>{
+  try {
+    if(req.user.id!==req.params.id) return res.status(403).send(`Acces Denied`)
+    const bookId = req.params.bookId
+    const users = getFileData()
+    const userIndex = users.findIndex((u) => u.id === req.params.id);
+    if (userIndex === -1) return res.status(403).send(`User not found`);
+    const before = users[userIndex].books.length;
+    users[userIndex].books = users[userIndex].books.filter(
+      (book) => book.id !== bookId
+    );
+    saveFileData(users);
+    res.json(users[userIndex].books);
+  } catch (err) {
+    console.log(err);
+    res.status(500).send(`internal server error`);
   }
 })
 const server = https.createServer(httpsNeccecities, app);
