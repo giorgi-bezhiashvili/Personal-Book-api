@@ -1,5 +1,11 @@
+### Variables
+@hostname = localhost
+@port = 8080
+@baseUrl = https://{{hostname}}:{{port}}
+
 ### 1. Register a new user
-POST https://localhost:8080/register
+# This creates the user in your data.json
+POST {{baseUrl}}/register
 Content-Type: application/json
 
 {
@@ -9,8 +15,8 @@ Content-Type: application/json
 }
 
 ### 2. Login to get JWT
-# @name login
-POST https://localhost:8080/login
+# After running this, copy the 'accessToken' from the response
+POST {{baseUrl}}/login
 Content-Type: application/json
 
 {
@@ -18,14 +24,46 @@ Content-Type: application/json
   "password": "SecurePassword123"
 }
 
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImI2YjBmNmQzLTcyYjEtNDNmNi05MjAxLTNlMjgwOGM5NjMzNSIsInVzZXJOIjoiam9obmRvZSIsImlhdCI6MTc3NzYzNDkyNywiZXhwIjoxNzc3NjM4NTI3fQ.n6mHJZ4GGrpZ7uCHP4T3hhBch9EYnOp2bvcq-QgCMS8
-### 3. Add a book to user's collection
+### ---------------------------------------------------------
+### SETUP FOR AUTHENTICATED REQUESTS
+### Paste the accessToken and the id from the login/register steps here:
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjRhZTVjMjU5LWJmMjktNGU4YS1iMWJkLWQ3N2FjN2I0OTAwZCIsInVzZXJOIjoiam9obmRvZSIsImlhdCI6MTc3NzY0ODE3OCwiZXhwIjoxNzc3NjUxNzc4fQ.UbikDP-UUTw9IeA7x0orRvjjxZdjrJ3rfZ4qiExIju4
+@userId = 4ae5c259-bf29-4e8a-b1bd-d77ac7b4900d
+### ---------------------------------------------------------
 
-POST https://localhost:8080/b6b0f6d3-72b1-43f6-9201-3e2808c96335/book/
+### 3. Add a book to user's collection
+POST {{baseUrl}}/{{userId}}/book/
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
   "title": "The Great Gatsby",
-  "author": "F. Scott Fitzgerald"
+  "author": "F. Scott Fitzgerald",
+  "state": "read"
+}
+
+### 4. Get User's book collection
+GET {{baseUrl}}/{{userId}}/book/
+Authorization: Bearer {{token}}
+
+### 5. Update a specific book (Test the line)
+# This will return the bookId if successful, or 403 if IDs don't match
+@bookIdToUpdate = 6cd6ca5d-adc8-4810-9dfe-787544e33373
+PUT {{baseUrl}}/{{userId}}/book/{{bookIdToUpdate}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Updated Book Title",
+  "state": "reading"
+}
+
+### 6. Test "Access Denied" (Simulate hacking/error)
+# Using a fake userId in the URL while keeping your real token
+PUT {{baseUrl}}/WRONG_USER_ID/book/{{bookIdToUpdate}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "This should fail with 403"
 }

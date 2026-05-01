@@ -12,11 +12,10 @@ const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
 const Joi = require(`joi`);
 const helmet = require(`helmet`);
-const { v4: uuidv4 } = require('uuid');
+const { v4: uuidv4 } = require("uuid");
 dotenv.config();
 app.disable("x-powered-by");
-const dummyHash = `$2b$10$eFN4uM/jBviTKQFDeAxTc.XtwRl3ujt4yKYRi0oDpd5nlDxmEcgZS`
-
+const dummyHash = `$2b$10$eFN4uM/jBviTKQFDeAxTc.XtwRl3ujt4yKYRi0oDpd5nlDxmEcgZS`;
 
 app.use(
   helmet({
@@ -28,7 +27,7 @@ function authenticationToken(req, res, next) {
   const authHeader = req.headers[`authorization`];
   const token = authHeader && authHeader.split(" ")[1];
   if (token == null) {
-    return res.status(401);
+    return res.sendStatus(401);
   }
   jwt.verify(token, process.env.ACCES_TOKEN_SECRET, (err, user) => {
     if (err) return res.sendStatus(403);
@@ -36,7 +35,6 @@ function authenticationToken(req, res, next) {
     next();
   });
 }
-
 const loginSceme = Joi.object({
   email: Joi.string().email().required(),
   password: Joi.string().min(8).max(20).required(),
@@ -87,11 +85,11 @@ app.post(
         userName: userName,
         password: hashedPassword,
         email: mail,
-        id:uuidv4(),
-        books:[]
+        id: uuidv4(),
+        books: [],
       };
       console.log(newUser.id);
-      
+
       users.push(newUser);
       res.send(`User Created succesfully`);
       saveFileData(users);
@@ -101,7 +99,8 @@ app.post(
     }
   },
 );
-const FAKE_HASH = "$2b$10$C6Q8XjO4vXzG9.Y7.Q1eOu.uK9O3e4R5t6y7u8i9o0p1a2s3d4f5g";
+const FAKE_HASH =
+  "$2b$10$C6Q8XjO4vXzG9.Y7.Q1eOu.uK9O3e4R5t6y7u8i9o0p1a2s3d4f5g";
 
 app.post(`/login`, async (req, res) => {
   const { error } = loginSceme.validate(req.body);
@@ -112,10 +111,9 @@ app.post(`/login`, async (req, res) => {
     const users = getFileData();
 
     const user = users.find((u) =>
-      userName ? u.userName === userName : u.email === email
+      userName ? u.userName === userName : u.email === email,
     );
 
-   
     const hashToVerify = user ? user.password : FAKE_HASH;
 
     const isMatch = await bcrypt.compare(password, hashToVerify);
@@ -125,9 +123,9 @@ app.post(`/login`, async (req, res) => {
     }
 
     const accessToken = jwt.sign(
-      { id: user.id, userN: user.userName }, 
+      { id: user.id, userN: user.userName },
       process.env.ACCES_TOKEN_SECRET,
-      { expiresIn: '1h' }
+      { expiresIn: "1h" },
     );
     res.json({ message: "Login successful", accessToken });
   } catch (err) {
@@ -136,22 +134,63 @@ app.post(`/login`, async (req, res) => {
   }
 });
 
-app.post("/:id/book/",authenticationToken, (req,res)=>{
+app.post("/:id/book/", authenticationToken, (req, res) => {
   try {
-    if(req.user.id !== req.params.id) return res.status(403).send(`Acces denied`)
-    const users = getFileData()
-    const userIndex = users.findIndex((u)=>u.id === req.params.id)
-    if (userIndex===-1) return res.status(403).send(`User not found`)
-    if(!users[userIndex].books) users[userIndex].books= []
-    users[userIndex].books.push(req.body)
-    saveFileData(users)
-    res.json(users[userIndex].basket)
+    if (req.user.id !== req.params.id)
+      return res.status(403).send(`Acces denied`);
+    const users = getFileData();
+    const {title,author,state}= req.body
+    const userIndex = users.findIndex((u) => u.id === req.params.id);
+    if (userIndex === -1) return res.status(403).send(`User not found`);
+    const newBook = {
+      title:title,
+      author:author,
+      bookId:uuidv4(),
+      state:state
+    }
+    if (!users[userIndex].books) users[userIndex].books = [];
+    users[userIndex].books.push(newBook);
+    saveFileData(users);
+    res.json(users[userIndex].books);
   } catch (err) {
     console.log(err);
+    res.status(500).send(`server error`);
+  }
+});
+app.get("/:id/book/", authenticationToken, (req,res)=>{
+  try {
+    if(req.user.id!==req.params.id) return res.status(403).send(`Acces denied`)
+    const users = getFileData()  
+    const userIndex = users.findIndex((u) => u.id === req.params.id);
+    if (userIndex === -1) return res.status(403).send(`User not found`);
+    if (!users[userIndex].books) users[userIndex].books = [];
+    res.send(users[userIndex].books)
+  } catch (err) {
     res.status(500).send(`server error`)
   }
 })
+app.put("/:id/book/:bookId",authenticationToken,(req,res)=>{
+  try {
+    if(req.user.id!==req.params.id) return res.status(403).send(`Acces Denied`)
+    const {title,state,author} = req.body
+    const bookId = req.params.bookId
+    const users = getFileData()
+    const userIndex = users.findIndex((u) => u.id === req.params.id);
 
+    const updatedBook={
+      title:title,
+      id:req.params.id,
+      author:author,
+      state:state
+    }
+    users[userIndex].books = updatedBook
+    saveFileData(users)
+    res.send(users[userIndex])
+    } catch (err) {
+      console.log(err);
+      res.send(`server error`)
+  }
+})
 const server = https.createServer(httpsNeccecities, app);
 server.listen(8080, (req, res) => {
   console.log(`Server is spinning on port 8080`);
