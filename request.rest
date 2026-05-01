@@ -1,26 +1,31 @@
-### Global Variables
-@baseUrl = https://localhost:8080
-@username = johndoe
-@password = johndoe208
-@email = johndoe@gmail.com
-
-### Register a new user
-# @name register
-POST {{baseUrl}}/register
+### 1. Register a new user
+POST https://localhost:8080/register
 Content-Type: application/json
 
 {
-    "userName": "{{username}}",
-    "password": "{{password}}",
-    "mail": "{{email}}"
+  "userName": "johndoe",
+  "mail": "john@example.com",
+  "password": "SecurePassword123"
 }
 
-### Login
+### 2. Login to get JWT
 # @name login
-POST {{baseUrl}}/login
+POST https://localhost:8080/login
 Content-Type: application/json
 
 {
-    "password": "{{password}}",
-    "email": "{{email}}"
+  "email": "john@example.com",
+  "password": "SecurePassword123"
+}
+
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImI2YjBmNmQzLTcyYjEtNDNmNi05MjAxLTNlMjgwOGM5NjMzNSIsInVzZXJOIjoiam9obmRvZSIsImlhdCI6MTc3NzYzNDkyNywiZXhwIjoxNzc3NjM4NTI3fQ.n6mHJZ4GGrpZ7uCHP4T3hhBch9EYnOp2bvcq-QgCMS8
+### 3. Add a book to user's collection
+
+POST https://localhost:8080/b6b0f6d3-72b1-43f6-9201-3e2808c96335/book/
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "The Great Gatsby",
+  "author": "F. Scott Fitzgerald"
 }

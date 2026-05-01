@@ -1,7 +1,14 @@
 [
   {
     "userName": "johndoe",
-    "password": "$2b$10$8G0mdvcqCwS1eNibWcY0bOb1pTlZEt.J./1ZMvpzMfoeMC1UEOjSG",
-    "email": "johndoe@gmail.com"
+    "password": "$2b$10$1cevjzOWJ99kFtqpb1pLOupbp5TCq35wdJVOQVsuFaCIfZdkpw4r.",
+    "email": "john@example.com",
+    "id": "b6b0f6d3-72b1-43f6-9201-3e2808c96335",
+    "books": [
+      {
+        "title": "The Great Gatsby",
+        "author": "F. Scott Fitzgerald"
+      }
+    ]
   }
 ]

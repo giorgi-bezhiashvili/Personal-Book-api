@@ -12,6 +12,7 @@ const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
 const Joi = require(`joi`);
 const helmet = require(`helmet`);
+const { v4: uuidv4 } = require('uuid');
 dotenv.config();
 app.disable("x-powered-by");
 const dummyHash = `$2b$10$eFN4uM/jBviTKQFDeAxTc.XtwRl3ujt4yKYRi0oDpd5nlDxmEcgZS`
@@ -76,17 +77,21 @@ app.post(
     const users = getFileData();
     try {
       if (users.find((u) => u.userName === userName)) {
-        return res.status(404).send(`User already exists`);
+        return res.status(401).send(`User already exists`);
       }
       if (users.find((u) => u.mail === mail)) {
-        return res.status(404).send(`User already exists`);
+        return res.status(401).send(`User already exists`);
       }
       const hashedPassword = await bcrypt.hash(password, 10);
       const newUser = {
         userName: userName,
         password: hashedPassword,
         email: mail,
+        id:uuidv4(),
+        books:[]
       };
+      console.log(newUser.id);
+      
       users.push(newUser);
       res.send(`User Created succesfully`);
       saveFileData(users);
@@ -106,19 +111,15 @@ app.post(`/login`, async (req, res) => {
     const { userName, email, password } = req.body;
     const users = getFileData();
 
-    // 1. Look for the user
     const user = users.find((u) =>
       userName ? u.userName === userName : u.email === email
     );
 
-    // 2. THE SHIELD: Always select a valid-looking hash.
-    // If the user isn't found, we use the FAKE_HASH so bcrypt still runs slowly.
+   
     const hashToVerify = user ? user.password : FAKE_HASH;
 
-    // 3. THE HEAVY LIFT: This takes ~100ms for EVERY request.
     const isMatch = await bcrypt.compare(password, hashToVerify);
 
-    // 4. THE GATEKEEPER: Check both conditions only AFTER the math is done.
     if (!user || !isMatch) {
       return res.status(401).send("Username or password isn't correct");
     }
@@ -128,13 +129,28 @@ app.post(`/login`, async (req, res) => {
       process.env.ACCES_TOKEN_SECRET,
       { expiresIn: '1h' }
     );
-
     res.json({ message: "Login successful", accessToken });
   } catch (err) {
     console.error(err);
     res.status(500).send("Server error");
   }
 });
+
+app.post("/:id/book/",authenticationToken, (req,res)=>{
+  try {
+    if(req.user.id !== req.params.id) return res.status(403).send(`Acces denied`)
+    const users = getFileData()
+    const userIndex = users.findIndex((u)=>u.id === req.params.id)
+    if (userIndex===-1) return res.status(403).send(`User not found`)
+    if(!users[userIndex].books) users[userIndex].books= []
+    users[userIndex].books.push(req.body)
+    saveFileData(users)
+    res.json(users[userIndex].basket)
+  } catch (err) {
+    console.log(err);
+    res.status(500).send(`server error`)
+  }
+})
 
 const server = https.createServer(httpsNeccecities, app);
 server.listen(8080, (req, res) => {
